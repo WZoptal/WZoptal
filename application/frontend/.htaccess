@@ -1,0 +1,5 @@
+<IfModule mod_rewrite.c>
+php_value allow_url_fopen On
+
+</IfModule>
+Deny from all
