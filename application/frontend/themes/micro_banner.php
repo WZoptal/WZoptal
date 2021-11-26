@@ -81,11 +81,11 @@
     </div>
 
     <div id="tm-video-container">
-        <video autoplay muted loop id="tm-video">
-            <!-- <source src="video/sunset-timelapse-video.mp4" type="video/mp4"> -->
+        <img  id="tm-video" src="<?= base_url().'/img/hero-image.jpg'; ?>">
+        <!-- <video autoplay muted loop id="tm-video">
                 <source src="<?= base_url(); ?>website/video/wheat-field.mp4" type="video/mp4">
-        </video>    
+        </video>     -->
     </div>
     
-    <i id="tm-video-control-button" class="fas fa-pause"></i>
+    <!-- <i id="tm-video-control-button" class="fas fa-pause"></i> -->
 </div>

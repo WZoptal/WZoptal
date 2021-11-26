@@ -42,9 +42,9 @@
                     <div class="col-lg-4 col-md-6 col-sm-12 tm-catalog-item">
                         <div class="position-relative tm-thumbnail-container">
                             <img src="<?=base_url()?>pics/plans/<?=$value['image']?>" alt="Image" class="img-fluid tm-catalog-item-img">    
-                            <a href="#" class="position-absolute tm-img-overlay">
+                            <!-- <a href="#" class="position-absolute tm-img-overlay">
                                 <i class="fas fa-play tm-overlay-icon"></i>
-                            </a>
+                            </a> -->
                         </div>
                         <div class="p-4 tm-bg-gray tm-catalog-item-description" id="plan_div">
                             <h3 class="tm-text-primary mb-3 tm-catalog-item-title"><?=$value['name']?></h3>

@@ -114,8 +114,9 @@
                     <label class="control-label col-md-4">Access Difficulty <span class="required"> * </span></label>
                     <div class="col-md-8">
                       <select name="access_difficulty" class="form-control">
-                          <option value="LOW" <?php echo !empty($categorydata['access_difficulty']) ? "selected": ""; ?>>Low</option>
-                          <option value="HIGH" <?php echo !empty($categorydata['access_difficulty']) ? "selected": ""; ?>>High</option>
+                          <option value="LOW" <?php if( trim($categorydata['access_difficulty']) == 'LOW') { echo "selected"; } ?>>Easy</option>
+                          <option value="MEDIUM" <?php if(trim($categorydata['access_difficulty']) == 'MEDIUM') { echo "selected"; } ?>>Medium</option>
+                          <option value="HIGH" <?php if(trim($categorydata['access_difficulty']) == 'HIGH') { echo "selected"; } ?>>Difficult</option>
 
                       </select>
 
@@ -127,14 +128,37 @@
                   <div class="form-group">
                   <label class="control-label col-md-4" >Location Icon <span class="required">*</span></label>
                   <div class="col-md-8">
-                   <?php if($do=="edit"){ ?>
+                    <div class="dummy_location">
+                      <div class="col-md-5">
+                        <input type="checkbox" id="dummy_location_check" name="default_location" <?php if($categorydata['icon'] == 'location_default_icon.jpg') { echo "checked"; }?>>
+                        <img src="<?php echo base_url().'../pics/location/location_default_icon.jpg'; ?>">
+                        <label class="control-label" >Default Icon </label>
+                      </div>
+                      <div class="col-md-2">
+                        <label class="control-label" >  OR </label>
+                      </div>
+                      <div class="col-md-5">
+                        <?php if($do=="edit"){ ?>
+                        <input type="file" class="form-control location_icon" name="icon" accept="image/*"  <?php if($categorydata['icon'] != 'location_default_icon.jpg') { echo "required"; } ?> >
+                        <?php if($categorydata['icon'] != 'location_default_icon.jpg') { ?>
+                        <img src="<?php echo !empty($categorydata['icon']) ? base_url().'../pics/location/'.$categorydata['icon']: ""; ?>">
+                        <?php } ?>
+                        <span class="required" style="color:red">*please upload icon image</span>
+                       <?php }else{?>
+                        <input type="file" class="form-control location_icon" name="icon" accept="image/*"> 
+                        <span class="required" style="color:red">*please upload icon image</span>
+                       <?php }?>
+                     </div>
+                    </div>
+
+                   <!-- <?php if($do=="edit"){ ?>
                     <input type="file" class="form-control" name="icon" accept="image/*" >
                     <img src="<?php echo !empty($categorydata['icon']) ? base_url().'../pics/location/'.$categorydata['icon']: ""; ?>">
                     <span class="required" style="color:red">*please upload icon image</span>
                    <?php }else{?>
                     <input type="file" class="form-control" name="icon" accept="image/*" required=""> 
                     <span class="required" style="color:red">*please upload icon image</span>
-                   <?php }?>
+                   <?php }?> -->
                   </div>
                  </div>
                   <div class="form-group">
@@ -266,8 +290,21 @@ function validate_form(){
      return true;
    }
 }
-</script> 
 
+$("#dummy_location_check").on("click", function(){
+  if ($(this).is(':checked')) {
+    $('.location_icon').removeAttr('required');
+  }else{
+    $('.location_icon').attr('required', 'required');
+  }
+}); 
+
+</script> 
+<style type="text/css">
+  .dummy_location img {
+      width: 50px;
+  }
+</style>
 <!-- <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDTJA6Vn26LzTvHcOEREnWrWDlpCBU3wEs&libraries=places"></script>
     <script>
         function initialize() {

@@ -117,12 +117,12 @@
         if(!empty($user['profile_pic']) )
         {
       ?>
-      <label>Edit Profile</label>
+      <label>Edit Profile Picture</label>
       <img src="<?php echo $user['profile_pic'];?>" width="70px" height="70px">
       <?php    
         }else{
       ?>
-      <label>Add Profile</label>
+      <label>Add Profile Picture</label>
       <?php } ?>
       <input type="file" name="image" class="form-control" > 
     </div>

@@ -5,7 +5,55 @@
 <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/plugins/bootstrap-datepicker/css/datepicker.css"/>
 <!-- END PAGE LEVEL STYLES -->
 <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/dd.css" />
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/cropper/2.3.4/cropper.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.0.0/cropper.min.js"></script>
 <!-- BEGIN PAGE HEADER-->
+<style type="text/css">
+  #files {
+    margin-bottom: 20px;
+  }
+  .errormsg {
+    color: red;
+  }
+  .imageThumb {
+      max-height: 75px;
+      border: 2px solid;
+      padding: 1px;
+      cursor: pointer;
+    }
+    .pip {
+      display: inline-block;
+      margin: 10px 10px 0 0;
+    }
+    .remove {
+      display: block;
+      background: #444;
+      border: 1px solid black;
+      color: white;
+      text-align: center;
+      cursor: pointer;
+    }
+    .remove:hover {
+      background: white;
+      color: black;
+    }
+
+    .btn{
+      background:white;
+      color:black;
+      border:1px solid black;
+      padding: 0.5em 1em;
+      text-decoration:none;
+      margin:0.8em 0.3em;
+      display:inline-block;
+      cursor:pointer;
+    }
+    .hide {
+      display: none;
+    }
+
+</style>
 <div class="row">
   <div class="col-md-12"> 
     <!-- BEGIN PAGE TITLE & BREADCRUMB-->
@@ -135,25 +183,71 @@
                  <div class="form-group">
                   <label class="control-label col-md-4" >Image <span class="required">*</span></label>
                   <div class="col-md-8">
+                    <span class="error_"> </span>
                    <?php if($do=="edit"){ ?>
-                    <input type="file" class="form-control" name="image[]" multiple accept="image/*" >
+                    <!-- <input type="file" class="form-control" name="image[]" multiple accept="image/*" > -->
 
-                     <?php foreach (array_filter(explode(",",$categorydata['image'])) as $key => $value) { ?>
-                     
-                         <img src="<?php echo !empty($categorydata['image']) ? base_url().'../pics/episode/'.$value: ""; ?>">
-                   <?php  }   ?>
+                   
 
 
 
                   <!--   <img src="<?php echo !empty($categorydata['image']) ? base_url().'../pics/episode/'.$categorydata['image']: ""; ?>"> -->
-                    <span class="required" style="color:red">*please upload image</span>
-                   <?php }else{?>
-                    <input type="file" class="form-control" name="image[]" multiple accept="image/*" required=""> 
-                    <span class="required" style="color:red">*please upload image</span>
+
+                    
+                    <input class="form-control" type="file" id="files" multiple accept="image/*"/ required="required">
+                    <?php 
+                      $count = 1;
+                      $existed_img = [];
+                     foreach (array_filter(explode(",",$categorydata['image'])) as $key => $value) { 
+                      $class = ''; 
+                      if($count == 1){
+                        $class = 'img_selected_crop'; 
+                      }
+                      if(!empty($categorydata['image']) ){
+                        $img_path = base_url().'../pics/episode/'.$value;
+                        $img_type = pathinfo($img_path, PATHINFO_EXTENSION);
+                        $img_result = file_get_contents($img_path);
+                        $img_base64 = 'data:image/' . $img_type . ';base64,' . base64_encode($img_result);
+                        $existed_img[] = $img_base64;
+                      }
+                    ?>
+                      <span class="pip">
+                        <img class="imageThumb <?php echo $class;?>" title="undefined" src="<?php echo !empty($categorydata['image']) ? $img_base64: ""; ?>" old-img="<?php echo !empty($categorydata['image']) ? $img_base64: ""; ?>"><br>
+                        <span class="remove">Remove image</span>
+                        <div></div>
+                      </span>
+                        <!--  <img src="<?php echo !empty($categorydata['image']) ? base_url().'../pics/episode/'.$value: ""; ?>"> -->
+                   <?php   $count++; }   ?>
+                    <input type="hidden" name="images" id="crop_im_data" value="<?php echo '|,|'.implode('|,|', $existed_img);?>">
+                    <div class="field" align="left">
+                      <?php 
+                        $copy_text = "hide";
+                        $copy_css = "";
+                        if( !empty( str_replace('|,|','', $existed_img) ) ) { 
+                          $copy_text = "";
+                          $copy_css = "width:300px;";
+                        } 
+                       ?>
+                      <div id="crop_im" style="width: 300px; <?php echo $copy_css;?>"></div>
+                      <button class="btn save crop_btn <?php echo $copy_text;?>">Copy</button>
+                    </div>
+
+                    <!-- <input type="file" class="form-control" name="image[]" multiple accept="image/*" required=""> 
+                    <span class="required" style="color:red">*please upload image</span> -->
+
+
+                   <?php }else{?>                      
+                      <input type="hidden" name="images" id="crop_im_data">
+                      <div class="field" align="left">
+                        <input class="form-control" type="file" id="files"  accept="image/*" multiple required="required"/>
+                        <div id="crop_im" style="width: 300px; height: 300px;"></div>
+                        <button class="btn save hide crop_btn">Crop</button>
+                      </div>
+                      <!-- <input type="file" class="form-control" name="image[]" multiple accept="image/*" required=""> 
+                      <span class="required" style="color:red">*please upload image</span> -->
                    <?php }?>
                   </div>
                  </div>
-
                  <div class="form-group">
                   <label class="control-label col-md-4" >Audio <span class="required">*</span></label>
                   <div class="col-md-8">
@@ -265,6 +359,27 @@
   //ComponentsPickers.init();
   });   
 </script> 
+
+
+<?php 
+  if(isset($categorydata['image'] ) && !empty($categorydata['image'])){
+    $category_data =  array_filter(explode(",",$categorydata['image']) );
+    $img_path = base_url().'../pics/episode/'.$category_data[0];
+    $img_type = pathinfo($img_path, PATHINFO_EXTENSION);
+    $img_result = file_get_contents($img_path);
+    $img_base64 = 'data:image/' . $img_type . ';base64,' . base64_encode($img_result);
+
+?>
+  
+  <script type="text/javascript">
+    $("#crop_btn").show();
+  /*  let img = document.createElement('img');
+        img.id = 'image';
+        img.src = '<?php echo $img_path;?>';
+        cropper = new Cropper(img);
+        $("#crop_im").html(img);*/
+  </script>
+<?php } ?>
 <script>
   var planLab = '';
 function validate_form(){
@@ -281,23 +396,166 @@ function validate_form(){
 }
 
 $('#visible_plans input[type="checkbox"]').click(function() { 
+
   var id = $(this).attr('id');
   planLab = $('input:checkbox:checked').map(function() {
           return $.trim($(this).next('label').text());
         }).get();
-  
-
   var str = $.trim(planLab);//JSON.stringify(planLab).replace(/"([^"]*)"/g, '$1').replaceAll("[", "").replaceAll("]", '');
   if(str === 'Free'){ 
     $('#visible_plans input[type=checkbox]').attr("disabled", true);
     $('#'+id).attr("disabled", false);
   }else{
-
     $('#visible_plans input[type=checkbox]').attr("disabled", false);
     $('#'+id).attr("disabled", false);
-
   }
-
 });
+</script>
 
-</script> 
+ <script type="text/javascript">
+  $(document).ready(function() {
+      var images = $('.pip').length;
+      // console.log("images");
+      // console.log(images);
+      // console.log("images");
+      if(images > 0){
+        $('#files').removeAttr('required');
+      }
+      var do_ = '<?php echo $do; ?>';
+      if(do_ == 'edit'){
+        let img = document.createElement('img');
+          img.id = 'image';
+          img.src = '<?php echo $img_path;?>';
+          cropper = new Cropper(img);
+          $("#crop_im").html(img);
+      }
+
+     $(document).on("click", ".remove",function(){
+        this_d = $(this);
+        var crop_im_data = $("#crop_im_data").val();
+        var splited = crop_im_data.split('|,|');
+        
+
+        var split = splited.filter(function (e) { 
+          var new_splited = $(this_d).parent(".pip").find('img').attr('src');
+          if( e != "" && new_splited != e ){ return e; } 
+        });
+        var res = split.join('|,|');
+        $("#crop_im_data").val(res);
+
+
+        $(this).parent(".pip").remove();
+        if($('.pip').length == 0){
+          $("#files").attr('required', 'required');
+          $("#crop_im").css('display', 'none');
+          $(".crop_btn").addClass('hide');
+        }else{
+          $("#files").removeAttr('required')
+          $("#crop_im").show();
+          $("#crop_im").css('display', 'block');
+        }
+
+        $("#files").next().find('img').addClass('img_selected_crop');
+      //  $(thisD).parent().parent().closest('.pip').addClass('img_selected_crop');
+        var src = $("#files").next().find('img').attr('src');
+        $('.cropper-canvas img').attr('src', src);
+        $('.cropper-view-box img').attr('src', src);
+      });
+
+
+
+    $('#files').val('');
+    let  save = document.querySelector('.save');
+    if (window.File && window.FileList && window.FileReader) {
+      $("#files").on("change", function(e) {
+        thisd = $(this);
+        var files = e.target.files,
+        filesLength = files.length;
+        var a = 1;
+        var images = $('.pip').length;
+
+        var final_lenght = images+filesLength; 
+        console.log(typeof final_lenght, final_lenght);
+        if(final_lenght > 5){
+          $('.error_').html('<span class="errormsg"> You Can upload maximum 5 Images</span>');
+          return;
+        }else{
+          $("#crop_im").css('display', 'block');
+          $("#crop_im").css({'height':'300px'});
+        }
+
+        for (var i = 0; i < filesLength; i++) {
+          var f = files[i];
+          var fileReader = new FileReader();
+          fileReader.onload = (function(e) {
+            var file = e.target;
+            // show save btn and options
+            save.classList.remove('hide');
+            let img = document.createElement('img');
+            img.id = 'image';
+            img.src = e.target.result
+            cropper = new Cropper(img);
+            $("#crop_im").html(img);
+            var crop_im_data = $("#crop_im_data").val();
+            $("#crop_im_data").val(crop_im_data+'|,|'+e.target.result);
+
+            var class_ = "imageThumb";
+            $("<span class=\"pip\">" +
+              "<img class=\""+ class_ +"\" old-img=\"" + e.target.result + "\" src=\"" + e.target.result + "\" title=\"" + file.name + "\"/>" +
+              "<br/><span class=\"remove\">Remove image</span>" +
+              "</span>").insertAfter("#files");
+           
+          });
+          fileReader.readAsDataURL(f);
+          a++;
+        }
+        setTimeout(function(){ $('.imageThumb').removeClass('img_selected_crop'); thisd.next().find('img').addClass('img_selected_crop'); console.log(files);  }, 500);
+      });
+
+    } else {
+      alert("Your browser doesn't support to File API")
+    }
+  });
+
+  $(document).on("click", ".imageThumb", function(){
+    $(".imageThumb").removeClass("img_selected_crop");
+    $(this).addClass("img_selected_crop");
+    var cropper = '';
+    var src = $(this).attr('old-img');
+    $('.cropper-canvas img').attr('src', src);
+    $('.cropper-view-box img').attr('src', src);
+    //$("#crop_im").html(img);
+  });
+
+  let result = document.querySelector('.result'),
+  img_result = document.querySelector('.img-result'),
+  img_h = document.querySelector('.img-h'),
+
+  cropped = document.querySelector('.cropped'),
+  upload = document.querySelector('#file-input'),
+  cropper = '';
+  save = document.querySelector('.save');
+
+  $(document).on('click', '.save', function(e){
+    e.preventDefault();
+      var crop_im_data = $("#crop_im_data").val();
+      var splited = crop_im_data.split('|,|');
+
+      var split = splited.filter(function (e) { 
+        var selected_src = $('.img_selected_crop').attr('src');
+        if( e != "" && selected_src != e ){ return e; } 
+      });
+
+      let imgSrc = cropper.getCroppedCanvas({
+        width: 300 // input value
+      }).toDataURL();
+      
+      $(".img_selected_crop").attr('src',imgSrc);
+      split.push(imgSrc);
+      var res= split.join('|,|');
+      $("#crop_im_data").val(res);
+
+  });
+
+
+</script>

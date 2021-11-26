@@ -74,6 +74,26 @@ class Episode extends CI_Controller {
 			header("Refresh:4; url=".base_url()."episode/manage_episode");
 		}
 	}
+
+
+	function save_base64_image($base64_image_string, $path_with_end_slash="" ) {
+	    $splited = explode(',', substr( $base64_image_string , 5 ) , 2);
+	    $mime=$splited[0];
+	    $data=$splited[1];
+	    $mime_split_without_base64=explode(';', $mime,2);
+	    $mime_split=explode('/', $mime_split_without_base64[0],2);
+	    if(count($mime_split)==2)
+	    {
+	        $extension=$mime_split[1];
+	        if($extension=='jpeg')$extension='jpg';
+	   		$_image  	  = 'bhps_'.uniqid().'_'.time().".".$extension;
+	        $image_name   = $_image;
+	    }
+	    $path 		  = "../pics/episode/" . $image_name;
+	    file_put_contents( $path, base64_decode($data) );
+	    return $image_name;
+	}
+
 	public function add_episode_to_database(){ 
 
 		// $last_id=1;
@@ -99,8 +119,24 @@ class Episode extends CI_Controller {
  		$_image    = $_FILES['image']['name'][0];
  		$audio     = $_FILES['audio']['name'][0];
  		$video     = $_FILES['video']['name'][0];
-		
-			if ($_image != "") {
+ 		$explod_img = [];
+		if( !empty($_POST['images']) ) {
+			$explod_img = explode('|,|', $_POST['images']);
+		}
+
+		$output_img = array_filter($explod_img);
+		$imgArr =[];
+		if( !empty($output_img) && is_array($output_img) ){
+			foreach ($output_img as $key_img => $value_img) {
+				$image_name = $this->save_base64_image(trim($value_img));
+				if(!empty($image_name) ){
+					$imgArr[] = $image_name;
+				}
+			}
+		}
+		$arr["image"] = implode(",",$imgArr);
+
+			/*if ($_image != "") {
 				
 					$allowed_image_extension = array("png","PNG","JPG","jpeg", "jpg","gif");
 					$imgArr =[];
@@ -125,7 +161,7 @@ class Episode extends CI_Controller {
 							$_image  	  = 'bhps_'.uniqid().'_'.time().".".$ext;
 							$image_name   = $_image;
 							$arr["image"] = $image_name;
-							 $path 		  = "../pics/episode/" . $image_name;
+							$path 		  = "../pics/episode/" . $image_name;
 							mkdir(dirname($path), 0777, true);
 							copy($_FILES['image']['tmp_name'][$key], $path);
 
@@ -135,7 +171,11 @@ class Episode extends CI_Controller {
 					}
 					$arr["image"] = implode(",",$imgArr);
 
-			}
+
+					
+
+			}*/
+			
 			if ($audio != "") {
 
 					$allowed_audio_extension = array("mp3","MP3","mp4","MP4","m4a","M4A");

@@ -1,5 +1,3 @@
-
-
 <!-- BEGIN PAGE LEVEL STYLES -->
 <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/plugins/bootstrap-fileinput/bootstrap-fileinput.css"/>
 <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/plugins/bootstrap-datepicker/css/datepicker.css"/>
@@ -161,7 +159,7 @@
 <script>
   jQuery(document).ready(function() {       
    // initiate layout and plugins
-  // App.init();
+   App.init();
   //ComponentsPickers.init();
   });   
 </script> 

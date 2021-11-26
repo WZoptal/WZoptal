@@ -80,46 +80,41 @@ class Location extends CI_Controller {
 		$arr["pincode"]= ucfirst(trim(trim($this->input->post("pincode"))));
 		$arr["latitude"]= ucfirst(trim(trim($this->input->post("latitude"))));
 		$arr["longitude"]= ucfirst(trim(trim($this->input->post("longitude"))));
-		$arr["access_difficulty"]= ucfirst(trim(trim($this->input->post("access_difficulty"))));
+		$arr["access_difficulty"] = ucfirst(trim(trim($this->input->post("access_difficulty"))));
 		$_icon    = $_FILES['icon']['name'];
  		$_image    = $_FILES['image']['name'][0];
  		$audio     = $_FILES['audio']['name'][0];
  		$video     = $_FILES['video']['name'][0];
-			
+		
+ 			if ($_icon != "" ) {
+				$allowed_icon_extension = array("png","PNG","JPG", "jpg","gif");					
+				$file_name = $_FILES["icon"]["name"];
+				$file_tmp  = $_FILES["icon"]["tmp_name"];
+    			$file_extension=pathinfo($file_name, PATHINFO_EXTENSION);
+    			if (! in_array($file_extension, $allowed_icon_extension)){
+					if(!empty($arr["id"])){
+						 $this->session->set_flashdata("errormsg","Upload valid images. Only PNG are allowed.");		 
+						redirect(base_url().$this->router->class."/edit_location/".$arr["id"]."/".$err);
+					}else{
+						 $this->session->set_flashdata("errormsg","Upload valid images. Only PNG are allowed.");		 
+						redirect(base_url().$this->router->class."/add_location/".$err);
+					}
+				}else{
+					$ext         = end(explode(".", $file_name)); 
+					$_icon  	 = 'bhps_'.uniqid().'_'.time().".".$ext;
+					$icon_name   = $_icon;
+					$arr["icon"] = $icon_name;
+					$path 		 = "../pics/location/" . $icon_name;
+					copy($_FILES['icon']['tmp_name'], $path);
+				}
 
- 			if ($_icon != "") {
-				
-					$allowed_icon_extension = array("png","PNG","JPG", "jpg","gif");
-				
-					
-						$file_name=$_FILES["icon"]["name"];
-						$file_tmp=$_FILES["icon"]["tmp_name"];
-		    			$file_extension=pathinfo($file_name, PATHINFO_EXTENSION);
-
-
-		    			if (! in_array($file_extension, $allowed_icon_extension)){
-							if(!empty($arr["id"])){
-								 $this->session->set_flashdata("errormsg","Upload valid images. Only PNG are allowed.");		 
-								redirect(base_url().$this->router->class."/edit_location/".$arr["id"]."/".$err);
-							}else{
-								 $this->session->set_flashdata("errormsg","Upload valid images. Only PNG are allowed.");		 
-								redirect(base_url().$this->router->class."/add_location/".$err);
-							}
-						}else{
-
-							 $ext          = end(explode(".", $file_name)); 
-							$_icon  	  = 'bhps_'.uniqid().'_'.time().".".$ext;
-							$icon_name   = $_icon;
-							$arr["icon"] = $icon_name;
-							$path 		  = "../pics/location/" . $icon_name;
-							copy($_FILES['icon']['tmp_name'], $path);
-
-						}
-
+			}else{
+				if($this->input->post("default_location") == 'on'){
+					$arr["icon"] = "location_default_icon.jpg";
+				}
 			}
 
- 			if ($_image != "") {
-				
+ 			if ($_image != "") {				
 					$allowed_image_extension = array("png","PNG","JPG", "jpg","gif");
 					$imgArr =[];
 					foreach($_FILES["image"]["tmp_name"] as $key=>$tmp_name) {
@@ -153,6 +148,7 @@ class Location extends CI_Controller {
 					$arr["image"] = implode(",",$imgArr);
 
 			}
+
 			if ($audio != "") {
 
 					$allowed_audio_extension = array("mp3","MP3","m4a","M4A");
@@ -223,10 +219,10 @@ class Location extends CI_Controller {
 					$arr["video"] = implode(",",$videoArr);
 			}
 
-
 		$this->session->set_flashdata("tempdata",strip_slashes($arr));
-		 
+
  		if($this->location_model->add_edit_episode($arr)){ 
+		//echo $this->db->last_query(); die;
 			$last_id = $this->db->insert_id(); 
 			$push = $this->pushNotification($last_id, $arr["title"]);
 			$err=0;

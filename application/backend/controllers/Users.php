@@ -267,7 +267,6 @@ class Users extends CI_Controller{
         $arr["plan_status"]= ucfirst(trim(trim($this->input->post("plan_status"))));
         $arr["address"]= ucfirst(trim(trim($this->input->post("address"))));
         $arr["planId"]= ucfirst(trim(trim($this->input->post("planId"))));
-        $arr["pincode"]= trim(trim($this->input->post("pincode")));
         $_image     = $_FILES['image']['name'];
         $pic_path =  $this->config->item('pic_dir_path');
             if ($_image != "") {

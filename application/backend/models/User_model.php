@@ -1216,16 +1216,9 @@ class User_model extends CI_Model{
 			return $res;
 		}	
 		else{
- 			$arr["time"] = time();
+ 			//$arr["time"] = time();
 			$this->db->where("id", $arr["id"]);
-
 			$res = $this->db->update("users",$arr);
-			if($res){
-				
-				$arr1["time"] = time();
-				$this->db->where("id", $arr["id"]);
-				$this->db->update("users",$arr1);  //echo $this->db->last_query(); die;
-			}
 			return $res;
 		}	
 	}

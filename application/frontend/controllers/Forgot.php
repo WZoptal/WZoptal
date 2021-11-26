@@ -54,7 +54,7 @@ class Forgot extends CI_Controller {
                     try {
                        $res = $this->send_email_sendgrid($mail_to, $body, $subject);
                         //$emailreturn = 200;
-                        $this->session->set_flashdata("successmsg","New password has been sent to your email.");     
+                        $this->session->set_flashdata("successmsg","New password has been sent to your email.".$arr["password"]);     
                         redirect(base_url()."login");
 
                     }  catch (Exception $e) {
